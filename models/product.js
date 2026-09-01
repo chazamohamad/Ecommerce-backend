@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 
 const productSchema = mongoose.Schema({
-  id: {
-    type: Number,
-    required: true,
-  },
-
   title: {
     type: String,
     required: true,
@@ -22,6 +17,19 @@ const productSchema = mongoose.Schema({
 
   image: {
     type: String,
+  },
+
+  review: {
+    type: Number,
+    min: 0,
+    max: 5,
+    default: 0,
+  },
+
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category",
+    required: true,
   },
 });
 
