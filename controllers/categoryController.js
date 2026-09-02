@@ -1,4 +1,5 @@
 const Category = require("../models/category");
+const Product = require("../models/Product");
 
 // GET ALL CATEGORIES
 
@@ -86,7 +87,17 @@ const updateCategory = async (req, res) => {
 
 const deleteCategory = async (req, res) => {
   try {
-    const category = await Category.findByIdAndDelete(req.params.id);
+    const categoryId = req.params.id;
+
+    // delete all products related to this category
+
+    await Product.deleteMany({
+      category: categoryId,
+    });
+
+    // delete category
+
+    const category = await Category.findByIdAndDelete(categoryId);
 
     if (!category) {
       return res.status(404).json({
@@ -95,7 +106,7 @@ const deleteCategory = async (req, res) => {
     }
 
     res.json({
-      message: "Category deleted successfully",
+      message: "Category and related products deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
@@ -103,7 +114,6 @@ const deleteCategory = async (req, res) => {
     });
   }
 };
-
 module.exports = {
   getCategories,
 
