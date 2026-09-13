@@ -2,7 +2,22 @@ const express = require("express");
 
 const router = express.Router();
 
-const { signup, login } = require("../controllers/userController");
+const {
+  signup,
+  login,
+  getUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+} = require("../controllers/userController");
+
+router.get("/", getUsers);
+
+router.post("/", createUser);
+
+router.put("/:id", updateUser);
+
+router.delete("/:id", deleteUser);
 
 // signup API
 

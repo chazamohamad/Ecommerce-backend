@@ -32,6 +32,13 @@ app.use("/api/users", userRoutes);
 const categoryRoutes = require("./routes/categoryRoutes");
 app.use("/api/categories", categoryRoutes);
 
+const cartRoutes = require("./routes/cartRoutes");
+app.use("/api/cart", cartRoutes);
+
+const orderRoutes = require("./routes/orderRoutes");
+
+app.use("/api/orders", orderRoutes);
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`); //teshghil server w t3ayet lal port
 });
