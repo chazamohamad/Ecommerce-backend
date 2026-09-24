@@ -4,7 +4,8 @@ const Order = require("../models/Order");
 
 const createOrder = async (req, res) => {
   try {
-    const { userId, products, totalPrice, phoneNumber, address } = req.body;
+    const { userId, products, totalPrice, deliveryInfo, paymentMethod } =
+      req.body;
 
     const order = new Order({
       orderNumber: "ORD-" + Date.now(),
@@ -15,9 +16,9 @@ const createOrder = async (req, res) => {
 
       totalPrice,
 
-      phoneNumber,
+      deliveryInfo,
 
-      address,
+      paymentMethod,
     });
 
     const savedOrder = await order.save();
@@ -38,7 +39,7 @@ const getAllOrders = async (req, res) => {
 
       .populate("userId", "FullName Email")
 
-      .populate("products.productId", "title price image");
+      .populate("products.productId", "title price ");
 
     res.json(orders);
   } catch (error) {
@@ -66,6 +67,60 @@ const getUserOrders = async (req, res) => {
   }
 };
 
+//GET ORDER BY ID
+
+const getOrderById = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+
+      // get user information
+
+      .populate("userId", "FullName Email")
+
+      // get product details including image
+
+      .populate("products.productId", "title price image");
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+      });
+    }
+
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// GET ORDER STATUS BY ORDER NUMBER
+
+const getOrderStatus = async (req, res) => {
+  try {
+    const order = await Order.findOne({
+      orderNumber: req.params.orderNumber,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+      });
+    }
+
+    res.json({
+      orderNumber: order.orderNumber,
+
+      status: order.status,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 // UPDATE ORDER STATUS
 
 const updateOrderStatus = async (req, res) => {
@@ -78,7 +133,7 @@ const updateOrderStatus = async (req, res) => {
       },
 
       {
-        new: true,
+        new: true, // Return the updated document
       },
     );
 
@@ -124,6 +179,10 @@ module.exports = {
   getAllOrders,
 
   getUserOrders,
+
+  getOrderById,
+
+  getOrderStatus,
 
   updateOrderStatus,
 

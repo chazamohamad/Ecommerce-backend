@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
-    // Order number
+    // Unique order number
 
     orderNumber: {
       type: String,
@@ -12,7 +12,7 @@ const orderSchema = new mongoose.Schema(
       unique: true,
     },
 
-    // User who made the order
+    // User who created the order
 
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -22,7 +22,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
-    // Products inside order
+    // Products inside the order
 
     products: [
       {
@@ -41,10 +41,18 @@ const orderSchema = new mongoose.Schema(
 
           default: 1,
         },
+
+        // Product price at the moment of purchase
+
+        price: {
+          type: Number,
+
+          required: true,
+        },
       },
     ],
 
-    // Total price of order
+    // Total price of all products
 
     totalPrice: {
       type: Number,
@@ -52,20 +60,54 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
-    // Customer phone number
+    // Delivery information
 
-    phoneNumber: {
-      type: String,
+    deliveryInfo: {
+      phoneNumber: {
+        type: String,
 
-      required: true,
+        required: true,
+      },
+
+      country: {
+        type: String,
+
+        required: true,
+      },
+
+      city: {
+        type: String,
+
+        required: true,
+      },
+
+      area: {
+        type: String,
+
+        required: true,
+      },
+
+      address: {
+        type: String,
+
+        required: true,
+      },
+
+      notes: {
+        type: String,
+
+        default: "",
+      },
     },
 
-    // Delivery address
+    // Payment method
 
-    address: {
+    paymentMethod: {
       type: String,
 
-      required: true,
+      enum: ["cash_on_delivery", "card"],
+
+      default: "cash_on_delivery",
     },
 
     // Order status

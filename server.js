@@ -1,28 +1,59 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv").config(); //bye2ra .env file
+require("dotenv").config();
+
+const swaggerUi = require("swagger-ui-express");
+const swaggerJsdoc = require("swagger-jsdoc");
 
 const app = express();
 
-app.use(cors()); //yeeni smeh lal frontend yettesel
-app.use(express.json()); //bikhalle express yefham json formats
+// Swagger
+
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.0",
+
+    info: {
+      title: "Ecommerce API",
+      version: "1.0.0",
+    },
+  },
+
+  apis: ["./routes/*.js"],
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Middlewares
+
+app.use(cors());
+
+app.use(express.json());
+
+// MongoDB
 
 mongoose
-  .connect(process.env.MONGO_URI) //ya mongoose tesel bl database(mongodb)
+  .connect(process.env.MONGO_URI)
+
   .then(() => {
     console.log("MongoDB Connected");
   })
+
   .catch((error) => {
     console.log(error);
   });
+
+// Test route
 
 app.get("/", (req, res) => {
   res.send("API is running");
 });
 
-const PORT = process.env.PORT || 5000; //eza fi port b .env staamlu eza lae 5000
-require("./models/category");
+// Routes
+
 const productRoutes = require("./routes/productRoutes");
 app.use("/api/products", productRoutes);
 
@@ -36,9 +67,12 @@ const cartRoutes = require("./routes/cartRoutes");
 app.use("/api/cart", cartRoutes);
 
 const orderRoutes = require("./routes/orderRoutes");
-
 app.use("/api/orders", orderRoutes);
 
+// Server
+
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`); //teshghil server w t3ayet lal port
+  console.log(`Server running on port ${PORT}`);
 });

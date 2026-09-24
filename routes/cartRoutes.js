@@ -14,24 +14,128 @@ const {
   clearCart,
 } = require("../controllers/cartController");
 
+/**
+ * @swagger
+ * tags:
+ *   name: Cart
+ *   description: Shopping cart APIs
+ */
+
 // GET USER CART
 
+/**
+ * @swagger
+ * /api/cart/{userId}:
+ *   get:
+ *     summary: Get user cart
+ *     tags: [Cart]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Cart fetched successfully
+ */
 router.get("/:userId", getCart);
 
 // ADD PRODUCT
 
+/**
+ * @swagger
+ * /api/cart:
+ *   post:
+ *     summary: Add product to cart
+ *     tags: [Cart]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *               productId:
+ *                 type: string
+ *               quantity:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Product added successfully
+ */
 router.post("/", addToCart);
+
+// CLEAR CART
+
+/**
+ * @swagger
+ * /api/cart/clear/{userId}:
+ *   delete:
+ *     summary: Clear user cart
+ *     tags: [Cart]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Cart cleared successfully
+ */
+router.delete("/clear/:userId", clearCart);
 
 // UPDATE QUANTITY
 
+/**
+ * @swagger
+ * /api/cart/{userId}/{productId}:
+ *   put:
+ *     summary: Update product quantity
+ *     tags: [Cart]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Quantity updated successfully
+ */
 router.put("/:userId/:productId", updateQuantity);
 
 // REMOVE PRODUCT
 
+/**
+ * @swagger
+ * /api/cart/{userId}/{productId}:
+ *   delete:
+ *     summary: Remove product from cart
+ *     tags: [Cart]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product removed successfully
+ */
 router.delete("/:userId/:productId", removeFromCart);
-
-// CLEAR CART
-
-router.delete("/clear/:userId", clearCart);
 
 module.exports = router;
