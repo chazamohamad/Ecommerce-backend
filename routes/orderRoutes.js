@@ -1,6 +1,7 @@
 const express = require("express");
 
 const router = express.Router();
+const protect = require("../middleware/authMiddleware");
 
 const {
   createOrder,
@@ -144,7 +145,7 @@ router.get("/:id", getOrderById);
  *         description: Server error
  */
 
-router.get("/status/:orderNumber", getOrderStatus);
+router.get("/status/:orderNumber", protect, getOrderStatus);
 
 // UPDATE STATUS
 

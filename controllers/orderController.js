@@ -211,6 +211,7 @@ const getOrderStatus = async (req, res) => {
   try {
     const order = await Order.findOne({
       orderNumber: req.params.orderNumber,
+      userId: req.user.id,
     });
 
     if (!order) {
