@@ -7,7 +7,10 @@ const getCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({
       userId: req.params.userId,
-    }).populate("products.productId", "title price image");
+    }).populate(
+      "products.productId",
+      "title price image quantityInStock salePercentage",
+    );
 
     if (!cart) {
       return res.status(404).json({
@@ -29,7 +32,7 @@ const addToCart = async (req, res) => {
   try {
     const { userId, productId, quantity } = req.body;
 
-    // check product exists
+    // get product
 
     const product = await Product.findById(productId);
 
@@ -39,19 +42,25 @@ const addToCart = async (req, res) => {
       });
     }
 
+    // CHECK STOCK
+
+    if (product.quantityInStock < quantity) {
+      return res.status(400).json({
+        message: "Not enough stock",
+      });
+    }
+
     let cart = await Cart.findOne({
-      userId: userId,
+      userId,
     });
 
-    // create cart if doesn't exist
+    // if no cart create one
 
     if (!cart) {
       cart = new Cart({
-        userId: userId,
+        userId,
 
         products: [],
-
-        totalPrice: 0,
       });
     }
 
@@ -62,37 +71,34 @@ const addToCart = async (req, res) => {
     );
 
     if (existingProduct) {
-      existingProduct.quantity += quantity || 1;
+      const newQuantity = existingProduct.quantity + quantity;
+
+      // CHECK AGAIN
+
+      if (product.quantityInStock < newQuantity) {
+        return res.status(400).json({
+          message: "Not enough stock",
+        });
+      }
+
+      existingProduct.quantity = newQuantity;
     } else {
       cart.products.push({
-        productId: productId,
+        productId,
 
-        quantity: quantity || 1,
+        quantity,
       });
     }
 
-    // calculate total price
-
-    let total = 0;
-
-    for (const item of cart.products) {
-      const product = await Product.findById(item.productId);
-
-      total += product.price * item.quantity;
-    }
-
-    cart.totalPrice = total;
-
     await cart.save();
 
-    res.json(cart);
+    res.status(201).json(cart);
   } catch (error) {
     res.status(500).json({
       message: error.message,
     });
   }
 };
-
 // UPDATE QUANTITY
 
 const updateQuantity = async (req, res) => {
@@ -103,26 +109,57 @@ const updateQuantity = async (req, res) => {
       userId: req.params.userId,
     });
 
-    const product = cart.products.find(
+    if (!cart) {
+      return res.status(404).json({
+        message: "Cart not found",
+      });
+    }
+
+    const cartProduct = cart.products.find(
       (item) => item.productId.toString() === req.params.productId,
     );
 
-    if (!product) {
+    if (!cartProduct) {
       return res.status(404).json({
         message: "Product not found in cart",
       });
     }
 
-    product.quantity = quantity;
+    // GET PRODUCT STOCK
 
-    // recalculate total price
+    const productData = await Product.findById(req.params.productId);
+
+    if (!productData) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    // CHECK STOCK
+
+    if (quantity > productData.quantityInStock) {
+      return res.status(400).json({
+        message: "Not enough stock available",
+      });
+    }
+
+    // UPDATE QUANTITY
+
+    cartProduct.quantity = quantity;
+
+    // RECALCULATE TOTAL PRICE
 
     let total = 0;
 
     for (const item of cart.products) {
-      const productData = await Product.findById(item.productId);
+      const product = await Product.findById(item.productId);
 
-      total += productData.price * item.quantity;
+      const finalPrice =
+        product.salePercentage > 0
+          ? product.price - (product.price * product.salePercentage) / 100
+          : product.price;
+
+      total += finalPrice * item.quantity;
     }
 
     cart.totalPrice = total;

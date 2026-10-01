@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 // GET ALL USERS
 
@@ -182,15 +183,26 @@ const login = async (req, res) => {
 
     // success login
 
+    const token = jwt.sign(
+      {
+        id: user._id,
+
+        email: user.Email,
+
+        FullName: user.FullName,
+
+        role: user.Role,
+      },
+
+      process.env.JWT_SECRET,
+
+      {
+        expiresIn: "1d",
+      },
+    );
     res.json({
       success: true,
-
-      user: {
-        id: user._id,
-        FullName: user.FullName,
-        Email: user.Email,
-        Role: user.Role,
-      },
+      token,
     });
   } catch (error) {
     res.status(500).json({

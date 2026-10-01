@@ -88,6 +88,12 @@ router.get("/:id", getProductById);
  *               review:
  *                 type: number
  *                 example: 5
+ *               quantityInStock:
+ *                 type: number
+ *                 example: 10
+ *               salePercentage:
+ *                 type: number
+ *                 example: 20
  *     responses:
  *       201:
  *         description: Product created successfully
