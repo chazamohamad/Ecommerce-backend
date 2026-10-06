@@ -45,7 +45,7 @@ router.get("/", protect, admin, getUsers);
  *   post:
  *     summary: Create a new user
  *     tags: [Users]
- *    security:
+ *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true

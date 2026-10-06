@@ -82,7 +82,7 @@ router.post("/", protect, customer, addToCart);
  *   delete:
  *     summary: Clear user cart
  *     tags: [Cart]
- *  security:
+ *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
