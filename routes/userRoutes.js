@@ -1,6 +1,8 @@
 const express = require("express");
 
 const router = express.Router();
+const protect = require("../middleware/authMiddleware");
+const admin = require("../middleware/adminMiddleware");
 
 const {
   signup,
@@ -29,11 +31,13 @@ const {
  *   get:
  *     summary: Get all users
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Users fetched successfully
  */
-router.get("/", getUsers);
+router.get("/", protect, admin, getUsers);
 
 /**
  * @swagger
@@ -41,6 +45,8 @@ router.get("/", getUsers);
  *   post:
  *     summary: Create a new user
  *     tags: [Users]
+ *    security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -60,7 +66,7 @@ router.get("/", getUsers);
  *       201:
  *         description: User created successfully
  */
-router.post("/", createUser);
+router.post("/", protect, admin, createUser);
 
 /**
  * @swagger
@@ -68,6 +74,8 @@ router.post("/", createUser);
  *   put:
  *     summary: Update user information
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -85,7 +93,7 @@ router.post("/", createUser);
  *       200:
  *         description: User updated successfully
  */
-router.put("/:id", updateUser);
+router.put("/:id", protect, admin, updateUser);
 
 /**
  * @swagger
@@ -93,6 +101,8 @@ router.put("/:id", updateUser);
  *   delete:
  *     summary: Delete user
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -104,7 +114,7 @@ router.put("/:id", updateUser);
  *       200:
  *         description: User deleted successfully
  */
-router.delete("/:id", deleteUser);
+router.delete("/:id", protect, admin, deleteUser);
 
 /**
  * @swagger

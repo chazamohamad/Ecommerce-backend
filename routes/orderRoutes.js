@@ -2,6 +2,8 @@ const express = require("express");
 
 const router = express.Router();
 const protect = require("../middleware/authMiddleware");
+const admin = require("../middleware/adminMiddleware");
+const customer = require("../middleware/customerMiddleware");
 
 const {
   createOrder,
@@ -9,6 +11,10 @@ const {
   getAllOrders,
 
   getUserOrders,
+
+  getOrderStatusStatistics,
+
+  getOrderByMonth,
 
   getOrderById,
 
@@ -34,6 +40,8 @@ const {
  *   post:
  *     summary: Create a new order
  *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -45,7 +53,7 @@ const {
  *         description: Order created successfully
  */
 
-router.post("/", createOrder);
+router.post("/", protect, customer, createOrder);
 
 // GET ALL ORDERS
 
@@ -55,12 +63,14 @@ router.post("/", createOrder);
  *   get:
  *     summary: Get all orders
  *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Orders fetched successfully
  */
 
-router.get("/", getAllOrders);
+router.get("/", protect, admin, getAllOrders);
 
 // GET USER ORDERS
 
@@ -70,6 +80,8 @@ router.get("/", getAllOrders);
  *   get:
  *     summary: Get orders by user ID
  *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -81,7 +93,116 @@ router.get("/", getAllOrders);
  *         description: User orders fetched successfully
  */
 
-router.get("/user/:userId", getUserOrders);
+router.get("/user/:userId", protect, getUserOrders);
+
+// GET ORDER STATUS STATISTICS
+/**
+ * @swagger
+ * /api/orders/status-statistics:
+ *   get:
+ *     summary: Get order status statistics
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Order status statistics fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalOrders:
+ *                   type: integer
+ *                   example: 100
+ *
+ *                 statistics:
+ *                   type: object
+ *                   properties:
+ *
+ *                     pending:
+ *                       type: object
+ *                       properties:
+ *                         count:
+ *                           type: integer
+ *                           example: 20
+ *                         percentage:
+ *                           type: integer
+ *                           example: 20
+ *
+ *                     completed:
+ *                       type: object
+ *                       properties:
+ *                         count:
+ *                           type: integer
+ *                           example: 50
+ *                         percentage:
+ *                           type: integer
+ *                           example: 50
+ *
+ *                     ondelivery:
+ *                       type: object
+ *                       properties:
+ *                         count:
+ *                           type: integer
+ *                           example: 30
+ *                         percentage:
+ *                           type: integer
+ *                           example: 30
+ *
+ *       401:
+ *         description: Unauthorized - missing or invalid token
+ *
+ *       403:
+ *         description: Forbidden - admin access required
+ *
+ *       500:
+ *         description: Server error
+ */
+router.get("/status-statistics", protect, admin, getOrderStatusStatistics);
+
+// GET ORDER BY MONTH
+
+/**
+ * @swagger
+ * /api/orders/completed-by-month:
+ *   get:
+ *     summary: Get completed orders statistics by month
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 2025
+ *         description: Year to get completed orders statistics
+ *     responses:
+ *       200:
+ *         description: Completed orders count by month
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 year:
+ *                   type: integer
+ *                   example: 2025
+ *                 statistics:
+ *                   type: object
+ *                   example:
+ *                     Jan: 14
+ *                     Feb: 20
+ *                     Mar: 8
+ *                     Dec: 70
+ *       400:
+ *         description: Year is required
+ *       500:
+ *         description: Server error
+ */
+router.get("/completed-by-month", protect, admin, getOrderByMonth);
 
 // GET ORDER BY ID
 
@@ -91,6 +212,8 @@ router.get("/user/:userId", getUserOrders);
  *   get:
  *     summary: Get order by ID
  *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -105,7 +228,7 @@ router.get("/user/:userId", getUserOrders);
  *         description: Order not found
  */
 
-router.get("/:id", getOrderById);
+router.get("/:id", protect, admin, getOrderById);
 
 // GET ORDER STATUS BY ORDER NUMBER
 
@@ -115,6 +238,8 @@ router.get("/:id", getOrderById);
  *   get:
  *     summary: Get order status by order number
  *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: orderNumber
@@ -155,6 +280,8 @@ router.get("/status/:orderNumber", protect, getOrderStatus);
  *   put:
  *     summary: Update order status
  *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -176,7 +303,7 @@ router.get("/status/:orderNumber", protect, getOrderStatus);
  *         description: Order updated successfully
  */
 
-router.put("/:id", updateOrderStatus);
+router.put("/:id", protect, admin, updateOrderStatus);
 
 // DELETE ORDER
 
@@ -186,6 +313,8 @@ router.put("/:id", updateOrderStatus);
  *   delete:
  *     summary: Delete order
  *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -197,6 +326,6 @@ router.put("/:id", updateOrderStatus);
  *         description: Order deleted successfully
  */
 
-router.delete("/:id", deleteOrder);
+router.delete("/:id", protect, admin, deleteOrder);
 
 module.exports = router;

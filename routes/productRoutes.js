@@ -1,6 +1,9 @@
 const express = require("express");
 
 const router = express.Router();
+const protect = require("../middleware/authMiddleware");
+
+const admin = require("../middleware/adminMiddleware");
 
 const {
   getProducts,
@@ -66,6 +69,8 @@ router.get("/:id", getProductById);
  *   post:
  *     summary: Create a new product
  *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -98,7 +103,7 @@ router.get("/:id", getProductById);
  *       201:
  *         description: Product created successfully
  */
-router.post("/", createProduct);
+router.post("/", protect, admin, createProduct);
 
 // DELETE
 
@@ -108,6 +113,8 @@ router.post("/", createProduct);
  *   delete:
  *     summary: Delete product
  *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -121,7 +128,7 @@ router.post("/", createProduct);
  *       404:
  *         description: Product not found
  */
-router.delete("/:id", deleteProduct);
+router.delete("/:id", protect, admin, deleteProduct);
 
 // UPDATE
 
@@ -131,6 +138,8 @@ router.delete("/:id", deleteProduct);
  *   put:
  *     summary: Update product
  *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -159,6 +168,6 @@ router.delete("/:id", deleteProduct);
  *       200:
  *         description: Product updated successfully
  */
-router.put("/:id", updateProduct);
+router.put("/:id", protect, admin, updateProduct);
 
 module.exports = router;

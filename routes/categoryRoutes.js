@@ -1,6 +1,8 @@
 const express = require("express");
 
 const router = express.Router();
+const protect = require("../middleware/authMiddleware");
+const admin = require("../middleware/adminMiddleware");
 
 const {
   getCategories,
@@ -63,6 +65,8 @@ router.get("/:id", getCategoryById);
  *   post:
  *     summary: Create category
  *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -76,7 +80,7 @@ router.get("/:id", getCategoryById);
  *       201:
  *         description: Category created successfully
  */
-router.post("/", createCategory);
+router.post("/", protect, admin, createCategory);
 
 // UPDATE
 
@@ -86,6 +90,8 @@ router.post("/", createCategory);
  *   put:
  *     summary: Update category
  *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -96,7 +102,7 @@ router.post("/", createCategory);
  *       200:
  *         description: Category updated successfully
  */
-router.put("/:id", updateCategory);
+router.put("/:id", protect, admin, updateCategory);
 
 // DELETE
 
@@ -106,6 +112,8 @@ router.put("/:id", updateCategory);
  *   delete:
  *     summary: Delete category
  *     tags: [Categories]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -116,6 +124,6 @@ router.put("/:id", updateCategory);
  *       200:
  *         description: Category deleted successfully
  */
-router.delete("/:id", deleteCategory);
+router.delete("/:id", protect, admin, deleteCategory);
 
 module.exports = router;

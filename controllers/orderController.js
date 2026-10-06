@@ -109,7 +109,6 @@ const getAllOrders = async (req, res) => {
     const filter = {};
 
     // SEARCH FILTER
-
     if (search) {
       filter.$or = [
         {
@@ -128,7 +127,6 @@ const getAllOrders = async (req, res) => {
     }
 
     // STATUS FILTER
-
     if (status) {
       filter.status = status;
     }
@@ -136,6 +134,10 @@ const getAllOrders = async (req, res) => {
     const orders = await Order.find(filter)
 
       .populate("userId", "FullName Email")
+
+      .sort({
+        createdAt: -1,
+      }) //-1 = descending (من الأكبر للأصغر)
 
       .skip(skip)
 
@@ -164,12 +166,175 @@ const getAllOrders = async (req, res) => {
 const getUserOrders = async (req, res) => {
   try {
     const orders = await Order.find({
-      userId: req.params.userId,
+      userId: req.user.id,
     })
 
       .populate("products.productId", "title price image");
 
     res.json(orders);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// GET ORDER STATUS STATISTICS
+
+const getOrderStatusStatistics = async (req, res) => {
+  try {
+    const totalOrders = await Order.countDocuments();
+
+    if (totalOrders === 0) {
+      return res.json({
+        totalOrders: 0,
+
+        statistics: {
+          pending: {
+            count: 0,
+            percentage: 0,
+          },
+
+          completed: {
+            count: 0,
+            percentage: 0,
+          },
+
+          ondelivery: {
+            count: 0,
+            percentage: 0,
+          },
+        },
+      });
+    }
+
+    const pendingOrders = await Order.countDocuments({
+      status: "pending",
+    });
+
+    const completedOrders = await Order.countDocuments({
+      status: "completed",
+    });
+
+    const onDeliveryOrders = await Order.countDocuments({
+      status: "ondelivery",
+    });
+
+    res.json({
+      totalOrders,
+
+      statistics: {
+        pending: {
+          count: pendingOrders,
+
+          percentage: Math.round((pendingOrders / totalOrders) * 100),
+        },
+
+        completed: {
+          count: completedOrders,
+
+          percentage: Math.round((completedOrders / totalOrders) * 100),
+        },
+
+        ondelivery: {
+          count: onDeliveryOrders,
+
+          percentage: Math.round((onDeliveryOrders / totalOrders) * 100),
+        },
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// GET COMPLETED ORDERS BY MONTH
+
+const getOrderByMonth = async (req, res) => {
+  try {
+    const year = Number(req.query.year);
+
+    if (!year) {
+      return res.status(400).json({
+        message: "Year is required",
+      });
+    }
+
+    const orders = await Order.find({
+      status: "completed",
+
+      createdAt: {
+        $gte: new Date(`${year}-01-01`), //Greater Than or Equal
+
+        $lt: new Date(`${year + 1}-01-01`), //Less Than
+      },
+    });
+
+    const months = {
+      Jan: 0,
+
+      Feb: 0,
+
+      Mar: 0,
+
+      Apr: 0,
+
+      May: 0,
+
+      Jun: 0,
+
+      Jul: 0,
+
+      Aug: 0,
+
+      Sep: 0,
+
+      Oct: 0,
+
+      Nov: 0,
+
+      Dec: 0,
+    };
+
+    orders.forEach((order) => {
+      const month = order.createdAt.getMonth(); //هنا نأخذ رقم الشهر من التاريخ
+      //JavaScript تبدأ الأشهر من صفر.
+      const monthNames = [
+        "Jan",
+
+        "Feb",
+
+        "Mar",
+
+        "Apr",
+
+        "May",
+
+        "Jun",
+
+        "Jul",
+
+        "Aug",
+
+        "Sep",
+
+        "Oct",
+
+        "Nov",
+
+        "Dec",
+      ];
+
+      months[monthNames[month]]++;
+    });
+
+    res.json({
+      year,
+
+      statistics: months,
+    });
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -290,6 +455,10 @@ module.exports = {
   getAllOrders,
 
   getUserOrders,
+
+  getOrderStatusStatistics,
+
+  getOrderByMonth,
 
   getOrderById,
 

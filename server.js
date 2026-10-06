@@ -18,6 +18,16 @@ const swaggerOptions = {
       title: "Ecommerce API",
       version: "1.0.0",
     },
+
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
   },
 
   apis: ["./routes/*.js"],
@@ -68,6 +78,9 @@ app.use("/api/cart", cartRoutes);
 
 const orderRoutes = require("./routes/orderRoutes");
 app.use("/api/orders", orderRoutes);
+
+const dashboardRoutes = require("./routes/dashboardRoutes");
+app.use("/api/dashboard", dashboardRoutes);
 
 // Server
 

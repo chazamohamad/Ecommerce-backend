@@ -1,6 +1,8 @@
 const express = require("express");
 
 const router = express.Router();
+const protect = require("../middleware/authMiddleware");
+const customer = require("../middleware/customerMiddleware");
 
 const {
   getCart,
@@ -29,6 +31,8 @@ const {
  *   get:
  *     summary: Get user cart
  *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -39,7 +43,7 @@ const {
  *       200:
  *         description: Cart fetched successfully
  */
-router.get("/:userId", getCart);
+router.get("/:userId", protect, customer, getCart);
 
 // ADD PRODUCT
 
@@ -49,6 +53,8 @@ router.get("/:userId", getCart);
  *   post:
  *     summary: Add product to cart
  *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -66,7 +72,7 @@ router.get("/:userId", getCart);
  *       200:
  *         description: Product added successfully
  */
-router.post("/", addToCart);
+router.post("/", protect, customer, addToCart);
 
 // CLEAR CART
 
@@ -76,6 +82,8 @@ router.post("/", addToCart);
  *   delete:
  *     summary: Clear user cart
  *     tags: [Cart]
+ *  security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -86,7 +94,7 @@ router.post("/", addToCart);
  *       200:
  *         description: Cart cleared successfully
  */
-router.delete("/clear/:userId", clearCart);
+router.delete("/clear/:userId", protect, customer, clearCart);
 
 // UPDATE QUANTITY
 
@@ -96,6 +104,8 @@ router.delete("/clear/:userId", clearCart);
  *   put:
  *     summary: Update product quantity
  *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -111,7 +121,7 @@ router.delete("/clear/:userId", clearCart);
  *       200:
  *         description: Quantity updated successfully
  */
-router.put("/:userId/:productId", updateQuantity);
+router.put("/:userId/:productId", protect, customer, updateQuantity);
 
 // REMOVE PRODUCT
 
@@ -121,6 +131,8 @@ router.put("/:userId/:productId", updateQuantity);
  *   delete:
  *     summary: Remove product from cart
  *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -136,6 +148,6 @@ router.put("/:userId/:productId", updateQuantity);
  *       200:
  *         description: Product removed successfully
  */
-router.delete("/:userId/:productId", removeFromCart);
+router.delete("/:userId/:productId", protect, customer, removeFromCart);
 
 module.exports = router;
