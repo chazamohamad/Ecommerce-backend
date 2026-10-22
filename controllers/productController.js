@@ -32,7 +32,7 @@ const getProducts = async (req, res) => {
 
       .sort({
         createdAt: -1,
-      })
+      }) //yaane ratebun mn l ahdas lal akdam
       .skip(skip)
 
       .limit(limit);
